@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .institute-detail-container {
+        background-color: #2e2e2e;
+        color: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    .institute-header {
+        padding: 2rem;
+        background: linear-gradient(135deg, #2c3e50 0%, #1a1a1a 100%);
+        position: relative;
+    }
+    
+    .institute-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    .institute-meta {
+        background-color: rgba(0, 0, 0, 0.3);
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .meta-item {
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .meta-item i {
+        color: #4e9af1;
+        font-size: 1.2rem;
+        min-width: 25px;
+        text-align: center;
+    }
+    
+    .status-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-weight: bold;
+        display: inline-block;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    /* Enhanced Gallery Styles */
+     .gallery-container {
+        position: relative;
+        padding: 2rem 0;
+        background: #121212; /* Fallback color */
+        transition: background-color 0.5s ease;
+    }
+    .gallery-main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        padding: 0 60px;
+    }
+    
+    .gallery-nav {
+        width: 150px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        filter: brightness(0.7);
+    }
+    
+    .gallery-nav:hover {
+        opacity: 0.9;
+        filter: brightness(0.9);
+    }
+    
+    .gallery-current {
+        width: 100%;
+        max-width: 700px;
+        height: 400px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        transition: transform 0.3s ease;
+    }
+    
+    .gallery-current:hover {
+        transform: scale(1.01);
+    }
+    
+    .gallery-thumbnails {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .thumbnail {
+        width: 80px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 5px;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+    }
+    
+    .thumbnail:hover, .thumbnail.active {
+        opacity: 1;
+        border-color: #4e9af1;
+    }
+    
+    .description-section {
+        line-height: 1.8;
+        font-size: 1.1rem;
+        background: rgba(30,30,30,0.7);
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin: 1.5rem 0;
+    }
+    
+    .btn-back {
+        background: linear-gradient(135deg, #4e9af1 0%, #3a7bc8 100%);
+        border: none;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s;
+        border-radius: 50px;
+        box-shadow: 0 4px 15px rgba(78, 154, 241, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-back:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(78, 154, 241, 0.4);
+    }
+    
+    @media (max-width: 768px) {
+        .gallery-main {
+            flex-direction: column;
+            padding: 0 20px;
+        }
+        
+        .gallery-nav {
+            width: 100%;
+            height: 80px;
+        }
+        
+        .gallery-current {
+            height: 300px;
+        }
+    }
+</style>
+
+<div class="container my-5">
+    <div class="institute-detail-container">
+        <!-- Enhanced Image Gallery -->
+        <div class="gallery-container">
+            <div class="gallery-main">
+                {% if institute.images.all|length > 1 %}
+                <img src="{{ prev_image.url }}" class="gallery-nav" id="prevImage" alt="Previous image">
+                {% endif %}
+                
+                <img src="{{ current_image.url }}" class="gallery-current" id="currentImage" alt="{{ institute.title }}">
+                
+                {% if institute.images.all|length > 1 %}
+                <img src="{{ next_image.url }}" class="gallery-nav" id="nextImage" alt="Next image">
+                {% endif %}
+            </div>
+            
+            <div class="gallery-thumbnails">
+                {% for image in institute.images.all %}
+                <img src="{{ image.image.url }}" class="thumbnail {% if forloop.first %}active{% endif %}" 
+                     onclick="changeImage('{{ image.image.url }}')" alt="Thumbnail {{ forloop.counter }}">
+                {% empty %}
+                <img src="{% static 'Images/default.jpg' %}" class="thumbnail active" 
+                     onclick="changeImage('{% static 'Images/default.jpg' %}')" alt="Default thumbnail">
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Institute Details -->
+        <div class="institute-header">
+            <h1 class="institute-title">{{ institute.title }}</h1>
+            <p>{{ institute.category }}</p>
+        </div>
+        
+        <div class="p-4">
+            <div class="institute-meta">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <strong>Location:</strong> {{ institute.location }}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-trophy"></i>
+                            <strong>Rank:</strong> {{ institute.rank }}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-building"></i>
+                            <strong>Department:</strong> {{ institute.department }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="meta-item">
+                            <i class="fas fa-phone"></i>
+                            <strong>Contact:</strong> {{ institute.contact }}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Status:</strong> 
+                            <span class="status-badge" style="color: {% if institute.status == 'Apply' %}yellow{% else %}red{% endif %};">
+                                {{ institute.status }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="description-section">
+                <h4 class="mb-3"><i class="fas fa-book-open me-2"></i>About</h4>
+                <p>{{ institute.description }}</p>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{% url 'Home' %}" class="btn btn-back">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+<script>
+    // Get all images
+    const images = [
+        {% for image in institute.images.all %}
+            "{{ image.image.url }}",
+        {% empty %}
+            "{% static 'Images/default.jpg' %}"
+        {% endfor %}
+    ];
+    
+    let currentIndex = 0;
+    
+    function updateGallery() {
+        document.getElementById('currentImage').src = images[currentIndex];
+        
+        // Update thumbnails
+        document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
+            thumb.classList.toggle('active', index === currentIndex);
+        });
+        
+        // Set prev/next images
+        const prevIndex = (currentIndex - 1 + images.length) % images.length;
+        const nextIndex = (currentIndex + 1) % images.length;
+        
+        if (images.length > 1) {
+            document.getElementById('prevImage').src = images[prevIndex];
+            document.getElementById('nextImage').src = images[nextIndex];
+            
+            // Set click handlers
+            document.getElementById('prevImage').onclick = () => {
+                currentIndex = prevIndex;
+                updateGallery();
+            };
+            
+            document.getElementById('nextImage').onclick = () => {
+                currentIndex = nextIndex;
+                updateGallery();
+            };
+        }
+    }
+    
+    function changeImage(imageUrl) {
+        currentIndex = images.indexOf(imageUrl);
+        updateGallery();
+    }
+    
+    // Initialize gallery
+    updateGallery();
+    
+    // Auto-rotate every 5 seconds
+    setInterval(() => {
+        currentIndex = (currentIndex + 1) % images.length;
+        updateGallery();
+    }, 5000);
+</script>
+{% endblock %}
